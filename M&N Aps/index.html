@@ -7,8 +7,18 @@
     <title>Files</title>
 </head>
 <body>
-    <form action="fileupload" method="post" enctype="multipart/form-data">
-    <input type="file" name="filetoupload"><br>
-    <input type="submit">
+    <form method="GET" action="/user">
+        <div class="container">
+            <div class="prompt">
+                <span>Enter username</span>
+            </div>
+            <div class="input">
+                <input type="text" id="username" name="username">
+            </div>
+            <div class="submit-username1">
+                <input type="submit" value="Submit">
+            </div>
+        </div>
+    </form>
 </body>
 </html>
