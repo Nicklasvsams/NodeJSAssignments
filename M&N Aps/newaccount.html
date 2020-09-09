@@ -7,10 +7,10 @@
     <title>Files</title>
 </head>
 <body>
-    <form method="GET" action="/user">
+    <form method="POST" action="/new/user/create">
         <div class="container">
             <div class="prompt">
-                <span>Login to user</span>
+                <span>Create new user</span>
             </div>
             <div class="input">
                 <input type="text" id="username" name="username" placeholder="Username">
@@ -19,15 +19,9 @@
                 <input type="text" id="password" name="password" placeholder="Password">
             </div>
             <div class="submit-username1">
-                <input type="submit" value="Login">
+                <input type="submit" value="Create user">
             </div>
         </div>
-    </form>
-
-    <br>
-
-    <form method="GET" action="/new/user">
-        <button type="submit" formaction="/new/user">New user</button>
     </form>
 </body>
 </html>

@@ -1,28 +1,52 @@
 const app = require('express')(),
+express = require('express'),
 fs = require('fs'), 
 server = require('http').createServer(app),
 formidable = require('formidable'),
 baseDir = "C:/Users/nics/Desktop/NVS/Opgaver/Opgave 8 - Node.js/NodeOpgaver/M&N Aps";
 var user = "";
-
+app.use(express.bodyParser());
 app.get('/', (req, res) => {
     res.sendFile(baseDir + "/index.html");
+});
+
+app.get('/new/user', (req, res) => {
+    res.sendFile(baseDir + "/newaccount.html");
+});
+
+app.post('/new/user/create', (req, res) => {
+    var username = req.body.username;
+    var password = req.body.password;
+    console.log(`Username: ${username}\nPassword: ${password}`)
+    res.redirect('back');
 });
 
 app.get('/user', (req, res) => {
     var username = req.query.username;
 
+    fs.mkdir(`${`${baseDir}/UserFiles/${username}`}`, function(){});
+
     if (username != "" && username != null){
         user = new User(username);
     }
 
-    createUserDir(user);
+    var htmlDir = "";
 
-    var userDir = getUserFilesPage(user);
+    if (fs.existsSync(user.dir)){
+        user.files.forEach(file => {
+            htmlDir = htmlDir.concat(`<p>${file}</p> <form action="/filedelete" method="get"><button type="submit" formaction="/filedelete/${file}">Delete</button></form>`);
+        });
+    };
 
-    res.write(headerHtml()+fileHtml()+footerHtml());
+    res.write(headerHtml()+htmlDir+fileHtml()+footerHtml());
     res.end();
 })
+
+app.get('/filedelete/:fileName', (req, res) => {
+    fs.unlinkSync(`${baseDir}/UserFiles/${user.username}/${req.params.fileName}`);
+    console.log(`${req.params.fileName} deleted`);
+    res.redirect('back');
+});
 
 app.post('/fileupload', (req, res) => {
     var path = `${baseDir}/UserFiles/${user.username}`;
@@ -39,8 +63,7 @@ app.post('/fileupload', (req, res) => {
 
             console.log(`File created and placed in ${newpath}`)
 
-            res.write(headerHtml()+fileHtml()+footerHtml());
-            res.end();
+            res.redirect('back');
         })
     })
 });
@@ -50,11 +73,15 @@ class User {
     constructor(username){
         this.username = username;
         this.dir = `${baseDir}/UserFiles/${username}`;
-    }
-}
 
-function createUserDir(user){
-    fs.mkdir(`${user.dir}`, function(){});
+        if (fs.existsSync(this.dir)){
+            this.files = fs.readdirSync(this.dir, function(err, list) {
+                if (err) throw err;
+                this.files = list;
+                return list;
+            });
+        }
+    }
 }
 
 function headerHtml(){
@@ -67,24 +94,4 @@ function fileHtml(){
 
 function footerHtml(){
     return '</body></html>'
-}
-
-function getUserFilesPage(user){
-    let userDir = `${baseDir}/UserFiles/${user.username}`;
-
-    return fs.readdir(userDir, function(err, files) {
-        if (err) throw err;
-
-        var directoryFiles = [];
-        
-        files.forEach(file => {
-            directoryFiles.push(file);
-        })
-
-        directoryFiles.forEach(file => {
-            console.log(file);
-        });
-
-        return directoryFiles;
-    });
 }
