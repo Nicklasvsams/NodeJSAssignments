@@ -4,22 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Files</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <title>M&N file management</title>
 </head>
 <body>
     <form method="POST" action="/new/users/create">
-        <div class="container">
-            <div class="prompt">
-                <span>Create new user</span>
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="prompt">
+                        <h1>Create new user</h1>
+                    </div>
+                </div>
             </div>
-            <div class="input">
-                <input type="text" id="username" name="username" placeholder="Username">
+        </div>
+        <br>
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="input">
+                        <input type="text" id="username" name="username" placeholder="Username">
+                    </div>
+                </div>
             </div>
-            <div class="input">
-                <input type="password" id="password" name="password" placeholder="Password">
+        </div>
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="input">
+                        <input type="password" id="password" name="password" placeholder="Password">
+                    </div>
+                </div>
             </div>
-            <div class="submit-username1">
-                <input type="submit" value="Create user">
+        </div>
+        <br>
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="submit-username1">
+                        <input type="submit" class="btn btn-success" value="Create user">
+                    </div>
+                </div>
             </div>
         </div>
     </form>

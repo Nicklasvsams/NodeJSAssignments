@@ -2,6 +2,7 @@
 const app = require('express')(), // The App required to set up the server.
 express = require('express'), // Required to set the urlencoded option further down.
 session = require('express-session'),
+path = require('path'),
 bcrypt = require('bcrypt'), // Bcrypt is a hashing tool which is used for our passwords
 saltRounds = 10, // The factor to which bcrypt encrypts the passwords - The higher the salt, the longer it takes.
 fs = require('fs'), // FileSystem to manipulate serverfiles
@@ -22,9 +23,10 @@ app.use(session({
     saveUninitialized: false
 }));
 
+app.use(express.static(path.join(__dirname, `public`)));
+
 // Sends the index.html file to the client to be loaded in the browser when the base url is called
 app.get('/', (req, res) => {
-    console.log(admin.username);
     res.sendFile(baseDir + "/index.html");
 });
 
@@ -53,9 +55,9 @@ app.post('/new/users/create', (req, res) => {
                 let json = JSON.parse(data);
                 
                 // Checks if the username already exists in the json document
-                if (json.users.some(user => user.username === username)){
+                if (json.users.some(user => user.username === username) || admin.username === username){
                     // Calls the end function which calls the informationHtml function which sends back a message and button in html
-                    res.end(informationHtml("Account name already taken, try again.", "/new/users"));
+                    res.end(headerHtml() + informationHtml("Account name already taken, try again.", "/new/users") + footerHtml());
                 }
                 else{
                     // If the user doesn't exist, the server creates a directory for the new user
@@ -70,14 +72,14 @@ app.post('/new/users/create', (req, res) => {
                     fs.writeFile('./M&N Aps/users.json', JSON.stringify(json), 'utf8', function(){});
 
                     // Calls the end function which calls the informationHtml function which sends back a message and button in html
-                    res.end(informationHtml("Account created successfully!", "/", "Back to login"));
+                    res.end(headerHtml() + informationHtml("Account created successfully!", "/", "Back to login") + footerHtml());
                 }
             });
         })
     }
     else{
         // Calls the end function which calls the informationHtml function which sends back a message and button in html
-        res.end(informationHtml("Account name or password not valid, try again.", "/new/users"));
+        res.end(headerHtml() + informationHtml("Account name or password not valid, try again.", "/new/users") + footerHtml());
     }
 });
 
@@ -121,19 +123,20 @@ app.get('/users/login', (req, res) => {
     }
     else{
         // Calls the end function which calls the informationHtml function which sends back a message and button in html
-        res.end(informationHtml("Username or password was invalid, try again.", "/"))
+        res.end(headerHtml()+informationHtml("Username or password was invalid, try again.", "/")+footerHtml())
     }
 })
 
 // When the users/login route function has been resolved, this route function is called
 app.get('/users/:userName', (req, res) =>{
     // Initialisation of htmlDir string, which will contain information about the users directory in html format
-    htmlDir = `<h2>${req.params.userName}'s directory</h2>`;
-
+    htmlDir = `<div class="container d-flex justify-content-center"><h2>${req.params.userName}'s directory</h2></div><br>`;
+    console.log("User auth: " + req.session.user.authenticated + "\nReq sess user: " + req.session.user.username + "\nReq params user: " + req.params.userName)
+    // QUERY SMOLL LETTER MEMBER, HAPPY MONDAI GLHF
     try{
         // Checks if the user session object is authenticated and if the parameter name matches the session username to avoid security breaches
         if (req.session.user.authenticated !== undefined && req.session.user.authenticated !== false && req.params.userName === req.session.user.username){
-
+            console.log("Access2")
             // Reinitialises the User object to update the directory information
             req.session.user = new User(req.params.userName, true);
 
@@ -155,28 +158,36 @@ app.get('/users/:userName', (req, res) =>{
                                 return list;
                             });
 
-                            // Header for the given users directory
-                            htmlDir = htmlDir.concat(`<h3>${directory}'s files</h3>`);
+                            // Tjekker hvorvidt der er indhold i den angivne mappe
+                            if (files.length > 0){
+                                // En container wrapper der har en h3 header
+                                htmlDir = htmlDir.concat(`<div class="container userfiles border border-dark rounded"><div class="container d-flex justify-content-center"><h3>${directory}'s files</h3></div>`);
 
-                            // Concatenates filename, deletebutton and downloadbutton html to string
-                            files.forEach(file => {
-                                htmlDir = htmlDir.concat(`<p>${file}</p> ${deleteButtonHtml("get", "submit", directory, "Delete", file)} 
-                                ${downloadButtonHtml("get", "submit", directory, "Download", file)}`);
-                            });
+                                // Concatenates filename, deletebutton and downloadbutton html to string
+                                files.forEach(file => {
+                                    htmlDir = htmlDir.concat(`<div class="container d-flex justify-content-between"><div class="row"><div class="col-sm"><h4>${file}</h4></div></div><div class="row"><div class="container d-flex"><div class="row"><div class="col-sm">${downloadButtonHtml("get", "submit", directory, "Download", file)}</div></div><div class="row"><div class="col-sm">${deleteButtonHtml("get", "submit", directory, "Delete", file)}</div></div></div></div></div><br>`);
+                                });
+
+                                htmlDir = htmlDir.concat('</div>');
+                            };
                         };
                     });
                 };  
             }
             else{
-                // If the users directory exists, a forEach loop will list all directories in html with a delete button
-                if (fs.existsSync(req.session.user.dir)){
-                    req.session.user.files.forEach(file => {
-                        htmlDir = htmlDir.concat(`<p>${file}</p> ${deleteButtonHtml("get", "submit", req.session.user.username, "Delete", file)}`);
-                    });
-                };  
+                if (req.session.user.files.length > 0){
+                console.log("Access3")
+
+                    // If the users directory exists, a forEach loop will list all directories in html with a delete button
+                    htmlDir = htmlDir.concat(`<div class="container userfiles border border-dark rounded">`);
+                    if (fs.existsSync(req.session.user.dir)){
+                        req.session.user.files.forEach(file => {
+                            htmlDir = htmlDir.concat(`<div class="container d-flex justify-content-between"><div class="row"><div class="col-sm"><h4>${file}</h4></div></div><div class="row"><div class="container d-flex"><div class="row"><div class="col-sm">${deleteButtonHtml("get", "submit", req.session.user.username, "Delete", file)}</div></div></div></div></div><br>`);
+                        });
+                    };  
+                    htmlDir = htmlDir.concat(`</div>`);
+                };
             };
-            //htmlDir = htmlDir.concat(`<p>${file}</p> ${buttonHtml("/filedelete", "get", "submit", "Delete", file)}`);
-            
             // Calls the end function with different html strings, to form a simple html page
             res.end(headerHtml()+htmlDir+fileHtml()+footerHtml());
         }
@@ -213,9 +224,15 @@ app.get('/filedelete/:user/:fileName', (req, res) => {
     };
 });
 
+// Allows the admin to download userfiles
 app.get('/filedownload/:user/:fileName', (req, res) => {
-    const file = `${req.session.user.dir}/${req.params.user}/${req.params.fileName}`;
-    res.download(file);
+    try{
+        const file = `${req.session.user.dir}/${req.params.user}/${req.params.fileName}`;
+        res.download(file, fn(err));
+    }
+    catch{
+        res.send(headerHtml()+informationHtml(`An error occured trying to process your request, please try again.`, `/users/${req.session.user.username}`));
+    }
 });
 
 // When a post function is called with /fileupload, this function will upload the specified file to the users directory
@@ -255,10 +272,10 @@ class User {
         this.authenticated = true;
 
         if (this.username === "Admin"){
-            this.dir = `${baseDir}/UserFiles`;
+            this.dir = `${baseDir}/userfiles`;
         }
         else{
-            this.dir = `${baseDir}/UserFiles/${username}`;
+            this.dir = `${baseDir}/userfiles/${username}`;
         };
 
         // Checks if the directory for the user exists and generates a list of the files in the directory
@@ -274,11 +291,11 @@ class User {
 // The functions below this comment are functions that return strings in html form, which can be used to quickly create a simple html site with modularity
 
 function headerHtml(){
-    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="ie=edge"><title>Files</title></head><body>'
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="ie=edge"><link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="/css/styles.css"><title>M&N file management</title></head><body>'
 };
 
 function fileHtml(){
-    return '<br><div><form action="/fileupload" method="post" enctype="multipart/form-data"><input type="file" name="filetoupload"><br><input type="submit"></div>';
+    return '<br><div class="container d-flex justify-content-center"><form action="/fileupload" method="post" enctype="multipart/form-data"><div class="container"><div class="row"><div class="col-sm"><input type="file" name="filetoupload"></div></div></div><br><div class="container"><div class="row"><div class="col-sm"><input class="btn btn-success" type="submit" value="Upload"></div></div></div></form></div>';
 };
 
 function footerHtml(){
@@ -286,13 +303,13 @@ function footerHtml(){
 };
 
 function downloadButtonHtml(method, type, user, text, variable){
-    return `<form action="/filedownload" method="${method}"><button type="${type}" formaction="/filedownload/${user}/${variable}">${text}</button></form>`
+    return `<form action="/filedownload" method="${method}"><button type="${type}" class="btn btn-dark" formaction="/filedownload/${user}/${variable}">${text}</button></form>`
 };
 
 function deleteButtonHtml(method, type, user, text, variable){
-    return `<form action="/filedelete" method="${method}"><button type="${type}" formaction="/filedelete/${user}/${variable}">${text}</button></form>`
+    return `<form action="/filedelete" method="${method}"><button type="${type}" class="btn btn-danger" formaction="/filedelete/${user}/${variable}">${text}</button></form>`
 };
 
 function informationHtml(message, action, buttonText = "Back"){
-    return `<p>${message}</p> <br><form method="GET" action="${action}"><button type="submit" formaction="${action}">${buttonText}</button></form>`
+    return `<div class="container d-flex justify-content-center"><div class="row"><h3>${message}</h3></div></div><br><div class="container d-flex justify-content-center"><div class="row"><form method="GET" action="${action}"><button type="submit" class="btn btn-dark" formaction="${action}">${buttonText}</button></div></div></form>`
 };

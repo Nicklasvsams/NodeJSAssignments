@@ -1,0 +1,12 @@
+body {
+    margin: 0;
+    padding: 3% 25% 0% 25%;
+}
+
+.userfiles{
+    width: 75%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-right: auto;
+    margin-left: auto;
+}

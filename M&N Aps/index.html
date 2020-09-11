@@ -4,28 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Files</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <title>M&N file management</title>
 </head>
 <body>
+    <div class="container d-flex justify-content-center">
+        <h1>M&N file management</h1>
+    </div>
+    <br>
     <form method="GET" action="/users/login">
-        <div class="container">
-            <div class="prompt">
-                <span>Login to user</span>
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="input">
+                            <input type="text" id="username" name="username" placeholder="Username">
+                    </div>
+                </div>
             </div>
-            <div class="input">
-                <input type="text" id="username" name="username" placeholder="Username">
+        </div>
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="input">
+                        <input type="password" id="password" name="password" placeholder="Password">
+                    </div>
+                </div>
             </div>
-            <div class="input">
-                <input type="password" id="password" name="password" placeholder="Password">
-            </div>
-            <div class="submit-username1">
-                <input type="submit" value="Login">
+        </div>
+        <br>
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="submit-username1">
+                        <input class="btn btn-success" type="submit" value="Login">
+                    </div>
+                </div>
             </div>
         </div>
     </form>
     <br>
-    <form method="GET" action="/new/users">
-        <button type="submit" formaction="/new/users">New user</button>
-    </form>
+    <br>
+    <div class="container d-flex justify-content-center">
+        <form method="GET" action="/new/users">
+            <button class="btn btn-dark" type="submit" formaction="/new/users">New user</button>
+        </form>
+    </div>
 </body>
 </html>
