@@ -129,14 +129,14 @@ app.get('/users/login', (req, res) => {
 
 // When the users/login route function has been resolved, this route function is called
 app.get('/users/:userName', (req, res) =>{
+
     // Initialisation of htmlDir string, which will contain information about the users directory in html format
     htmlDir = `<div class="container d-flex justify-content-center"><h2>${req.params.userName}'s directory</h2></div><br>`;
-    console.log("User auth: " + req.session.user.authenticated + "\nReq sess user: " + req.session.user.username + "\nReq params user: " + req.params.userName)
-    // QUERY SMOLL LETTER MEMBER, HAPPY MONDAI GLHF
+
     try{
         // Checks if the user session object is authenticated and if the parameter name matches the session username to avoid security breaches
-        if (req.session.user.authenticated !== undefined && req.session.user.authenticated !== false && req.params.userName === req.session.user.username){
-            console.log("Access2")
+        if (req.session.user.authenticated !== undefined && req.session.user.authenticated !== false && req.params.userName.toLocaleLowerCase() === req.session.user.username.toLocaleLowerCase()){
+            
             // Reinitialises the User object to update the directory information
             req.session.user = new User(req.params.userName, true);
 
@@ -176,7 +176,6 @@ app.get('/users/:userName', (req, res) =>{
             }
             else{
                 if (req.session.user.files.length > 0){
-                console.log("Access3")
 
                     // If the users directory exists, a forEach loop will list all directories in html with a delete button
                     htmlDir = htmlDir.concat(`<div class="container userfiles border border-dark rounded">`);
